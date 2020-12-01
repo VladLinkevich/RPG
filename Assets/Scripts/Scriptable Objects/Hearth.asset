@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 51d0f154b5cf5df469462a4bc07cbf7d, type: 3}
   m_Name: Hearth
   m_EditorClassIdentifier: 
-  objectName: 
-  sprite: {fileID: 0}
-  quantity: 0
-  stakable: 0
-  itemType: 0
+  objectName: heart
+  sprite: {fileID: -8843976880988234773, guid: b2d6038bfc144ac43bf9739380362f43, type: 3}
+  quantity: 1
+  stakable: 1
+  itemType: 1
