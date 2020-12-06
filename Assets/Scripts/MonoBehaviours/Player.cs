@@ -1,9 +1,22 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : Character
 {
+    public HitPoints hitPoints;
+    public HealthBar healthBarPrefab;
+    public Inventory inventoryPrefab;
+
+    HealthBar healthBar;
+    Inventory inventory;
+
+    void Start()
+    {
+
+        hitPoints.value = startHitPoints;
+    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -13,24 +26,79 @@ public class Player : Character
 
             if (hitObject != null)
             {
-                print("it: " + hitObject.objectName);
+                bool shouldDisappear = false;
 
                 switch (hitObject.itemType)
                 {
-                    case Item.ItemType.COIN:                                        break;
-                    case Item.ItemType.HEALTH: AdjustHitPoints(hitObject.quantity); break;
+                    case Item.ItemType.COIN:
+                        shouldDisappear = inventory.AddItem(hitObject);
+                        break;
+                    case Item.ItemType.HEALTH:
+                        shouldDisappear = AdjustHitPoints(hitObject.quantity);
+                        break;
                         
                 }
 
-                collision.gameObject.SetActive(false);
+                if (shouldDisappear)
+                {
+                    collision.gameObject.SetActive(false);
+                }
             }
         }
     }
 
-    public void AdjustHitPoints(int amount)
+
+
+    public bool AdjustHitPoints(int amount)
     {
-        hitPoints = hitPoints + amount;
-        print("Adjusted hitpoints by: " + amount + ". New value: " + hitPoints);
+        if (hitPoints.value < maxHitPoints)
+        {
+            hitPoints.value += amount;
+            print("Adjusted hitpoints by: " + amount + ". New value: " + hitPoints);
+
+            return true;
+        }
+
+        return false;
     }
 
+    public override void ResetCharacter()
+    {
+        healthBar = Instantiate(healthBarPrefab);
+        inventory = Instantiate(inventoryPrefab);
+        healthBar.character = this;
+
+        hitPoints.value = startHitPoints;
+    }
+
+    public override IEnumerator DamageCharacter(int damage, float interval)
+    {
+        while (true)
+        {
+            hitPoints.value -= damage;
+
+            if (hitPoints.value <= float.Epsilon)
+            {
+                KillCharacter();
+                break;
+            }
+
+            if (interval > float.Epsilon)
+            {
+                yield return new WaitForSeconds(interval);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+
+    public override void KillCharacter()
+    {
+        base.KillCharacter();
+
+        Destroy(healthBar.gameObject);
+        Destroy(inventory.gameObject);
+    }
 }
